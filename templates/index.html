@@ -1,104 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Agent Assistant</title>
-    <style>
-        body {
-            background-color: #f0f4f8; /* Light background */
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
-        }
-
-        h1 {
-            font-size: 3em;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        h3 {
-            font-size: 1.5em;
-            color: #666;
-            margin-bottom: 40px;
-        }
-
-        input[type="text"] {
-            width: 300px;
-            padding: 12px 20px;
-            margin: 8px 0;
-            box-sizing: border-box;
-            border: 2px solid #0077cc;
-            border-radius: 10px;
-            font-size: 16px;
-        }
-
-        button {
-            padding: 12px 25px;
-            background-color: #0077cc;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        button:hover {
-            background-color: #005fa3;
-        }
-
-        #response {
-            margin-top: 30px;
-            font-size: 18px;
-            color: #444;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-    </style>
+    <title>Airbnb Search Assistant</title>
 </head>
 <body>
-    <h1>Hi, I'm your agent</h1>
-    <h3>Integrated with Pinecone Database</h3>
-    <p>Ask me anything related to the AI Engineer internship roadmap!</p>
+    <h1>Airbnb Search Assistant</h1>
+    <form id="searchForm">
+        <label for="query">Enter your booking requirements:</label><br>
+        <input type="text" id="query" name="query" placeholder="e.g., 2-bedroom in Toronto next weekend" required><br><br>
+        <button type="submit">Search</button>
+    </form>
 
-    <input type="text" id="queryInput" placeholder="Type your AI question here...">
-    <button onclick="sendQuery()">Send</button>
-
-    <p id="response"></p>
+    <h2>Results:</h2>
+    <pre id="result"></pre>
 
     <script>
-        function sendQuery() {
-            const query = document.getElementById('queryInput').value;
-            const responseElement = document.getElementById('response');
+        const form = document.getElementById("searchForm");
+        const resultBox = document.getElementById("result");
 
-            if (query.trim() === "") {
-                responseElement.innerText = "Please enter a question.";
-                return;
-            }
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            resultBox.textContent = "Searching...";
 
-            responseElement.innerText = "Loading your response..."; // 👈 Show loading message
+            const query = document.getElementById("query").value;
 
-            fetch('http://localhost:5000/ask', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ query: query })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.answer) {
-                    responseElement.innerText = data.answer;
-                } else if (data.error) {
-                    responseElement.innerText = "Error: " + data.error;
-                }
-            })
-            .catch(error => {
-                responseElement.innerText = "Error: " + error;
+            const response = await fetch("/search", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query })
             });
-        }
+
+            const data = await response.json();
+            if (data.result) {
+                resultBox.textContent = data.result;
+            } else {
+                resultBox.textContent = "Error: " + (data.error || "Unknown error");
+            }
+        });
     </script>
 </body>
 </html>
