@@ -1,11 +1,11 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from agent_logic import search_airbnb
 
 app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Airbnb Search Agent is running!"
+    return render_template("index.html")  # Shows your HTML page
 
 @app.route("/search", methods=["POST"])
 def handle_search():
